@@ -1,0 +1,80 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: white;
+    color: black;
+}
+
+body.dark {
+    background-color: #121212;
+    color: white;
+}
+
+h1, h2, h3, h4 {
+    margin-top: 0;
+}
+
+button {
+    margin: 5px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+input, select, textarea {
+    margin: 5px 0;
+    padding: 6px;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+nav {
+    margin-bottom: 20px;
+}
+
+nav button {
+    margin-right: 10px;
+}
+
+hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid #ccc;
+}
+
+canvas {
+    margin-top: 20px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-conteudo {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+}
+
+#mapa {
+    width: 100%;
+    height: 400px;
+}

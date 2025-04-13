@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Denúncia</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body onload="coletarLocalizacao()">
+    <h2>Fazer uma Denúncia</h2>
+    <form onsubmit="enviarDenuncia(event)">
+        <input type="text" id="titulo" placeholder="Título" required>
+        <br>
+        <textarea id="descricao" placeholder="Descrição" required></textarea>
+        <br>
+        <select id="categoria" required>
+            <option value="Iluminação">Iluminação</option>
+            <option value="Segurança">Segurança</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Outros">Outros</option>
+        </select>
+        <br><br>
+
+        <label>Endereço</label>
+        <br>
+        <input type="text" id="rua" placeholder="Rua" required><br>
+        <input type="text" id="numero" placeholder="Número" required><br>
+        <input type="text" id="bairro" placeholder="Bairro" required><br>
+        <input type="text" id="cidade" placeholder="Cidade" required><br>
+        <input type="text" id="estado" placeholder="Estado" required><br>
+
+        <button type="button" onclick="mostrarMapa()">
+            <i class="fas fa-map-marker-alt"></i> Buscar endereço no mapa
+        </button>
+
+        <input type="hidden" id="latitude">
+        <input type="hidden" id="longitude">
+        <br><br>
+        <button type="submit">Enviar Denúncia</button>
+    </form>
+
+    <!-- Modal com o mapa -->
+    <div id="modalMapa" class="modal" onclick="fecharMapa(event)">
+        <div class="modal-conteudo">
+            <div id="mapa"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet + Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Administrador</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>Painel do Administrador</h2>
+    <input type="text" id="filtroBairro" placeholder="Filtrar por bairro">
+    <input type="date" id="dataInicial">
+    <input type="date" id="dataFinal">
+    <button onclick="filtrarDenuncias()">Filtrar</button>
+    <br>
+    <input type="text" id="buscaPalavra" placeholder="Buscar palavra-chave">
+    <button onclick="buscarPalavraChave()">Buscar</button>
+    <button onclick="exportarCSV()">Exportar CSV</button>
+    <br><br>
+    <div id="lista-denuncias"></div>
+    <canvas id="graficoBairros" width="400" height="200"></canvas>
+    <script src="js/script.js"></script>
+</body>
+</html>
