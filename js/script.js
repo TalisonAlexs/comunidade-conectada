@@ -11,6 +11,20 @@ function cadastrar() {
     alert("Cadastro simulado.");
 }
 
+// Função auxiliar para retornar o ícone baseado na categoria
+function getIconeCategoria(categoria) {
+    switch (categoria) {
+        case "Iluminação":
+            return `<i class="fas fa-lightbulb" style="color: #f9c74f;"></i>`;
+        case "Segurança":
+            return `<i class="fas fa-shield-alt" style="color: #f94144;"></i>`;
+        case "Transporte":
+            return `<i class="fas fa-bus" style="color: #577590;"></i>`;
+        default:
+            return `<i class="fas fa-exclamation-circle" style="color: #adb5bd;"></i>`;
+    }
+}
+
 function enviarDenuncia(e) {
     e.preventDefault();
 
@@ -24,30 +38,49 @@ function enviarDenuncia(e) {
     const categoria = document.getElementById("categoria").value;
     const latitude = document.getElementById("latitude").value;
     const longitude = document.getElementById("longitude").value;
+    const imagemInput = document.getElementById("imagem");
     const usuario = JSON.parse(localStorage.getItem("usuarioAtual")) || { nome: "Anônimo" };
 
     const enderecoCompleto = `${rua}, ${numero} - ${bairro}, ${cidade} - ${estado}`;
 
-    const denuncia = {
-        titulo,
-        descricao,
-        endereco: enderecoCompleto,
-        bairro,
-        categoria,
-        latitude,
-        longitude,
-        votos: 0,
-        status: "Pendente",
-        comentarios: [],
-        nome: usuario.nome,
-        data: new Date().toLocaleString()
-    };
+    // Ler imagem se houver
+    if (imagemInput.files && imagemInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            salvarDenuncia(event.target.result);
+        };
+        reader.readAsDataURL(imagemInput.files[0]);
+    } else {
+        salvarDenuncia(null);
+    }
 
-    const denuncias = JSON.parse(localStorage.getItem("denuncias") || "[]");
-    denuncias.push(denuncia);
-    localStorage.setItem("denuncias", JSON.stringify(denuncias));
-    alert("Denúncia enviada com sucesso!");
-    window.location.href = "index.html";
+    function salvarDenuncia(imagemBase64) {
+        const denuncia = {
+            titulo,
+            descricao,
+            endereco: enderecoCompleto,
+            bairro,
+            categoria,
+            latitude,
+            longitude,
+            imagem: imagemBase64,
+            votos: 0,
+            status: "Pendente",
+            comentarios: [],
+            nome: usuario.nome,
+            data: new Date().toLocaleString()
+        };
+
+        const denuncias = JSON.parse(localStorage.getItem("denuncias") || "[]");
+        denuncias.push(denuncia);
+        localStorage.setItem("denuncias", JSON.stringify(denuncias));
+
+        mostrarNotificacao();
+
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 3000);
+    }
 }
 
 function coletarLocalizacao() {
@@ -66,8 +99,6 @@ function coletarLocalizacao() {
 
 function filtrarDenuncias() {
     const bairro = document.getElementById("filtroBairro").value.toLowerCase();
-    const inicio = new Date(document.getElementById("dataInicial").value);
-    const fim = new Date(document.getElementById("dataFinal").value);
     const container = document.getElementById("lista-denuncias");
 
     container.innerHTML = "";
@@ -80,8 +111,9 @@ function filtrarDenuncias() {
         div.innerHTML = `
             <h3>${d.titulo}</h3>
             <p><strong>Descrição:</strong> ${d.descricao}</p>
+            ${d.imagem ? `<img src="${d.imagem}" alt="Imagem da denúncia" style="max-width: 100%; margin: 10px 0;">` : ''}
             <p><strong>Endereço:</strong> ${d.endereco || "Não informado"}</p>
-            <p><strong>Categoria:</strong> ${d.categoria}</p>
+            <p><strong>Categoria:</strong> ${getIconeCategoria(d.categoria)} ${d.categoria}</p>
             <p><strong>Status:</strong>
                 <select onchange="atualizarStatus(${i}, this.value)">
                     <option ${d.status === "Pendente" ? "selected" : ""}>Pendente</option>
@@ -128,57 +160,19 @@ function atualizarStatus(index, novoStatus) {
     localStorage.setItem("denuncias", JSON.stringify(denuncias));
 }
 
-async function buscarEndereco() {
-    const rua = document.getElementById('rua').value;
-    const numero = document.getElementById('numero').value;
-    const bairro = document.getElementById('bairro').value;
-    const cidade = document.getElementById('cidade').value;
-    const estado = document.getElementById('estado').value;
+function fecharMapa(event) {
+    const modal = document.getElementById("modalMapa");
+    const conteudo = document.querySelector(".modal-conteudo");
 
-    if (!rua || !numero || !bairro || !cidade || !estado) {
-        alert("Preencha todos os campos do endereço.");
-        return;
-    }
-
-    const query = encodeURIComponent(`${rua} ${numero}, ${bairro}, ${cidade}, ${estado}`);
-
-    try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`);
-        const resultados = await response.json();
-
-        if (resultados.length > 0) {
-            const lat = parseFloat(resultados[0].lat);
-            const lon = parseFloat(resultados[0].lon);
-
-            document.getElementById('latitude').value = lat;
-            document.getElementById('longitude').value = lon;
-
-            const mapa = window._mapaLeaflet;
-            const marcador = window._marcadorLeaflet;
-
-            mapa.setView([lat, lon], 17);
-
-            if (marcador) {
-                marcador.setLatLng([lat, lon]);
-            } else {
-                window._marcadorLeaflet = L.marker([lat, lon]).addTo(mapa);
-            }
-        } else {
-            alert('Endereço não encontrado.');
-        }
-    } catch (error) {
-        alert("Erro ao buscar o endereço. Tente novamente.");
-        console.error(error);
+    if (!conteudo.contains(event.target)) {
+        modal.style.display = "none";
     }
 }
-
-let mapaIniciado = false;
 
 async function mostrarMapa() {
     const modal = document.getElementById("modalMapa");
     modal.style.display = "flex";
 
-    // Se o mapa já foi iniciado, só mostrar novamente
     if (window._mapaLeaflet) {
         centralizarMapaNoEndereco();
         return;
@@ -218,22 +212,14 @@ async function mostrarMapa() {
         } catch (error) {
             console.error("Erro ao buscar endereço:", error);
         }
+
+        document.getElementById("modalMapa").style.display = "none";
     });
 
     window._mapaLeaflet = mapa;
     window._marcadorLeaflet = marcador;
 
     centralizarMapaNoEndereco();
-}
-
-
-function fecharMapa(event) {
-    const modal = document.getElementById("modalMapa");
-    const conteudo = document.querySelector(".modal-conteudo");
-
-    if (!conteudo.contains(event.target)) {
-        modal.style.display = "none";
-    }
 }
 
 async function centralizarMapaNoEndereco() {
@@ -269,54 +255,12 @@ async function centralizarMapaNoEndereco() {
     }
 }
 
-function inicializarMapaDenuncia() {
-    const mapa = L.map('mapa').setView([-23.5505, -46.6333], 13);
+function mostrarNotificacao(mensagem = "Denúncia enviada com sucesso!") {
+    const notif = document.getElementById("notificacao");
+    notif.textContent = mensagem;
+    notif.style.display = "block";
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(mapa);
-
-    let marcador;
-
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(pos => {
-            const { latitude, longitude } = pos.coords;
-            mapa.setView([latitude, longitude], 15);
-        });
-    }
-
-    mapa.on('click', async function (e) {
-        const { lat, lng } = e.latlng;
-
-        document.getElementById('latitude').value = lat;
-        document.getElementById('longitude').value = lng;
-
-        if (marcador) {
-            marcador.setLatLng(e.latlng);
-        } else {
-            marcador = L.marker(e.latlng).addTo(mapa);
-        }
-
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
-            const data = await response.json();
-            const endereco = data.address;
-
-            if (endereco) {
-                document.getElementById('rua').value = endereco.road || '';
-                document.getElementById('bairro').value = endereco.suburb || endereco.neighbourhood || '';
-                document.getElementById('cidade').value = endereco.city || endereco.town || endereco.village || '';
-                document.getElementById('estado').value = endereco.state || '';
-            } else {
-                alert("Não foi possível obter o endereço.");
-            }
-        } catch (error) {
-            console.error("Erro ao buscar endereço:", error);
-        }
-
-        document.getElementById("modalMapa").style.display = "none";
-    });
-
-    window._mapaLeaflet = mapa;
-    window._marcadorLeaflet = marcador;
+    setTimeout(() => {
+        notif.style.display = "none";
+    }, 3000);
 }

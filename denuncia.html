@@ -26,7 +26,7 @@
         <label>Endereço</label>
         <br>
         <input type="text" id="rua" placeholder="Rua" required><br>
-        <input type="text" id="numero" placeholder="Número" required><br>
+        <input type="text" id="numero" placeholder="Número"><br>
         <input type="text" id="bairro" placeholder="Bairro" required><br>
         <input type="text" id="cidade" placeholder="Cidade" required><br>
         <input type="text" id="estado" placeholder="Estado" required><br>
@@ -38,18 +38,21 @@
         <input type="hidden" id="latitude">
         <input type="hidden" id="longitude">
         <br><br>
+        <label>Imagem (opcional):</label><br>
+        <input type="file" id="imagem" accept="image/*"><br><br>
         <button type="submit">Enviar Denúncia</button>
     </form>
 
-    <!-- Modal com o mapa -->
     <div id="modalMapa" class="modal" onclick="fecharMapa(event)">
         <div class="modal-conteudo">
             <div id="mapa"></div>
         </div>
     </div>
 
-    <!-- Leaflet + Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/script.js"></script>
+
+    <div id="notificacao" class="notificacao">Denúncia enviada com sucesso!</div>
+
 </body>
 </html>
